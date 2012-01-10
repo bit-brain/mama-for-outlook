@@ -1,0 +1,5 @@
+# Da es Windows nicht so genau mit Groß- und Kleinschreibung bei Dateinamen
+# nimmt, werden alle Erweiterungen jeweils mit allen Varianten erfasst.
+
+*.[Ss][Uu][Oo]
+publish/

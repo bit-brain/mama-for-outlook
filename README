@@ -1,0 +1,8 @@
+This file describes use of the repository. For use of the application itself see: doc/README
+
+The directories:
+
+app/
+ All application related stuff (source, resources etc.) goes here.
+doc/
+ All documentation stuff (README, manual and it's images etc.) goes here.

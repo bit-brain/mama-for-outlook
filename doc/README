@@ -1,0 +1,92 @@
+MAMA for Outlook - Mass Attachement Mailing Assistant for Outlook
+
+This Outlook-AddIn is intended to be used for sending multiple files as attachement to different people and/or with different text based on the file names.
+For example you may name files after peoples' e-mail addresses and then have all the files been sent to the respective address.
+After installation it comes in handy as a small bar (actually a FormRegion) below your standard e-mail mask and gives you the ability to define a regex which files are to be send and which portion of the filename is to be used for replacement matters, where the files are located and if you wish to have a preview first.
+
+Limitations
+
+As this process is attachement driven, you can have exactly one e-mail created per file automatically. Despite of that you may attach other files or do what ever you want with the resulting message by choosing 'Preview'.
+The process to send mass mail attachements is by design not bound to the default send button.
+
+Working with Regex - Examples
+
+see http://msdn.microsoft.com/en-us/library/az24scfc.aspx for further documentation of the used Regex library.
+
+Example 1
+
+If you want to send one specific file (pdf) to a bunch of people each name the file after the corresponding address.
+
+Regex:
+^(.*)\.pdf$
+(^ is the start, $ the end, the first pair of parentheses is referenced to as $1. The whole match is always referenced by $0)
+
+Files:
+John.Doe.pdf
+James.Dean.pdf
+Jack.Daniels.pdf
+
+E-Mail:
+To: $1@example.com
+Subject: File for $1
+Body: Hi $1, I attached file $0 for you.
+
+Here you get three e-mail to John.Doe@example.com, James.Dean@example.com, and Jack.Daniels@example.com.
+First e-mail:
+
+To: John.Doe@example.com
+Subject: File for John.Doe
+Body: Hi John.Doe, I attached file John.Doe.pdf for you.
+
+Example 2
+
+Assume first- and last name are always seperated by a dot (and no dot appears inside of them).
+
+Regex:
+^((.*)\.(.*))\.pdf$
+(The three groups are then referenced as follows. $1 is firstname.lastname, $2 is firstname, $3 is lastname)
+
+Files:
+John.Doe.pdf
+James.Dean.pdf
+Jack.Daniels.pdf
+
+E-Mail:
+To: $1@example.com
+Subject: File for Mr. $3
+Body: Hi $2, I attached file $0 for you.
+
+Result:
+To: John.Doe@example.com
+Subject: File for Mr. Doe
+Body: Hi John, I attached file John.Doe.pdf for you.
+
+
+Example 3
+
+e-mail addresses in file names.
+
+Regex:
+^((.*)@(.*))\.pdf$
+(The three groups are then referenced as follows. $1 is firstname.lastname, $2 is firstname, $3 is lastname)
+
+Files:
+John.Doe@example.com.pdf
+James@Dean.com.pdf
+Jack.Daniels.pdf
+
+E-Mail:
+To: $1@$2
+Subject: File for $1
+Body: Hi $1, I attached file $0 for you.
+
+Result (only two e-mail, because "Jack.Daniels.pdf" does not match:
+To: John.Doe@example.com
+Subject: File for John.Doe
+Body: Hi John.Doe, I attached file John.Doe@example.com.pdf for you.
+
+To: James@Dean.com
+Subject: File for James
+Body: Hi James, I attached file James@Dean.com.pdf for you.
+
+Beware: In this very example "something@somthingelse@example.com.pdf" would have matched! To exclude this "^(([\@]*)@([\@]*))\.pdf$" should have been used.
