@@ -12,6 +12,8 @@ The process to send mass mail attachements is by design not bound to the default
 Working with Regex - Examples
 
 see http://msdn.microsoft.com/en-us/library/az24scfc.aspx for further documentation of the used Regex library.
+Numbered and named subexpression matches are supported (see http://msdn.microsoft.com/en-us/library/bs2twtah.aspx).
+Numbered groups are referenced by $number or ${number} eg. $1 or ${1}. Named groups can only be referenced via ${groupname} eg. ${amount}. The latter are specified by (?<groupname>subexpression) or (?'groupname'subexpression).
 
 Example 1
 
@@ -45,6 +47,9 @@ Assume first- and last name are always seperated by a dot (and no dot appears in
 Regex:
 ^((.*)\.(.*))\.pdf$
 (The three groups are then referenced as follows. $1 is firstname.lastname, $2 is firstname, $3 is lastname)
+Or with named groups:
+^((?<firstname>.*)\.(?<lastname>.*))\.pdf$
+(Here the three groups are then referenced as follows. $1 is firstname.lastname, ${firstname} or $2 is firstname, ${lastname} or $3 is lastname)
 
 Files:
 John.Doe.pdf

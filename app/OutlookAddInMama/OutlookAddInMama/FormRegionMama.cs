@@ -185,9 +185,12 @@ namespace OutlookAddInMama
                     GroupCollection coll = match.Groups;
                     for (int i = 0; i < coll.Count; i++)
                     {
-                        replacementDictionary.Add("" + i, coll[i].Value);
+                        string key = regex.GroupNameFromNumber(i);
+                        replacementDictionary.Add(key, coll[i].Value);
+                        //so that a named group can also be accessed via it's number
+                        if (!key.Equals("" + regex.GroupNumberFromName(key))) replacementDictionary.Add("" + regex.GroupNumberFromName(key), coll[i].Value);
                     }
-
+                    
                     //since neither simple replace nor regex replace seemed to be appropriate, i quickly wrote a replacement parser
                     ReplacementParser rp = new ReplacementParser(replacementDictionary);
 

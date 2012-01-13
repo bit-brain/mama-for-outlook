@@ -78,6 +78,7 @@ namespace UnitTests
             replacementDictionary.Add("10", "${1}");
             replacementDictionary.Add("1532", "he");
             replacementDictionary.Add("15321", "she");
+            replacementDictionary.Add("namedgroup", "rose");
 
             ReplacementParser target = new ReplacementParser(replacementDictionary); // TODO: Passenden Wert initialisieren
 
@@ -194,6 +195,16 @@ namespace UnitTests
 
             input = "$1$2$3$4";
             expected = "you$3me$4";
+            actual = target.replaceAll(input);
+            Assert.AreEqual(expected, actual);
+
+            input = "${namedgroup}$";
+            expected = "rose$";
+            actual = target.replaceAll(input);
+            Assert.AreEqual(expected, actual);
+
+            input = "$namedgroup$";
+            expected = "$namedgroup$";
             actual = target.replaceAll(input);
             Assert.AreEqual(expected, actual);
         }

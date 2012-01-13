@@ -53,6 +53,9 @@ namespace OutlookAddInMama
 
             string output = "";
 
+            //magicQueuing indicates queueing after ${ before }
+            bool magicQueuing = false;
+
             //iterate through input string char by char
             for (int i = 0; i < input.Length; i++)
             {
@@ -70,9 +73,18 @@ namespace OutlookAddInMama
                     case '7':
                     case '8':
                     case '9':
-                    case '{':
                         //if in queue, store these special characters
                         if (queue.Count > 0) queue.Enqueue(current);
+                        else output += current;
+                        break;
+                    case '{':
+                        //if in queue, store these special characters
+                        if (queue.Count > 0)
+                        {
+                            queue.Enqueue(current);
+                            //and switch on the magic
+                            magicQueuing = true;
+                        }
                         else output += current;
                         break;
                     case '}':
@@ -80,15 +92,20 @@ namespace OutlookAddInMama
                         if (queue.Count > 0)
                         {
                             queue.Enqueue(current);
+                            magicQueuing = false;
                             output += collapseQueue();
                         }
                         else output += current;
                         break;
                     case '$':
                         //queueing ends whenever this character appears
-                        if (queue.Count == 1) //hier ist nur das dollarzeichen drin
+                        if (queue.Count == 1) //only $ in queue
                         {
                             output += collapseQueue();
+                        }
+                        else if (magicQueuing) //magic queue ends only at }
+                        {
+                            queue.Enqueue(current);
                         }
                         else
                         {
@@ -97,9 +114,16 @@ namespace OutlookAddInMama
                         }
                         break;
                     default:
-                        //queueing ends whenever any other character appears
-                        if (queue.Count > 0) output += collapseQueue();
-                        output += current;
+                        if (magicQueuing)
+                        {
+                            queue.Enqueue(current);
+                        }
+                        else
+                        {
+                            //queueing ends whenever any other character appears
+                            if (queue.Count > 0) output += collapseQueue();
+                            output += current;
+                        }
                         break;
                 }
             }
@@ -114,24 +138,38 @@ namespace OutlookAddInMama
         /// <returns>the queue content replaced</returns>
         private string collapseQueue()
         {
+            if (this.queue.Count == 0) return "";
+
             string queueString = "";
             while (this.queue.Count > 0)
             {
                 queueString += this.queue.Dequeue();
             }
 
-            //as for now the placeholder must be $ followed by a number or ${ followed by a number and }
-            MatchCollection matches = Regex.Matches(queueString, @"^\$([0-9]+)|(\{([0-9]+)\})$");
+            //as for now the placeholder must be $ followed by a number
+            MatchCollection matches = Regex.Matches(queueString, @"^\$([0-9]+)$");
             if (matches.Count == 1)
             {
                 //the match is the replacement number
                 string match = "";
                 if (matches[0].Groups[1].Success) match = matches[0].Groups[1].Value; //$n
-                else if (matches[0].Groups[3].Success) match = matches[0].Groups[3].Value; //${n}
                 
                 //there has not to be a replacement for this placeholder
                 if (this.replacementDictionary.ContainsKey(match)) return this.replacementDictionary[match];
             }
+
+            //${n}
+            matches = Regex.Matches(queueString, @"^\$\{([a-zA-Z0-9]+)(:.*)?\}$");
+            if (matches.Count == 1)
+            {
+                //the match is the replacement number/name
+                string match = "";
+                if (matches[0].Groups[1].Success) match = matches[0].Groups[1].Value; //${n}
+                
+                //there has not to be a replacement for this placeholder
+                if (this.replacementDictionary.ContainsKey(match)) return this.replacementDictionary[match];
+            }
+
             return queueString;
         }
     }
